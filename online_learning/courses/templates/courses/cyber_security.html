@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cyber security</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://img.freepik.com/free-vector/geometric-science-education-background-vector-gradient-blue-digital-remix_53876-125993.jpg?semt=ais_hybrid') no-repeat center center/cover;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            flex-direction: column;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 900px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        h1 { font-size: 30px; margin-bottom: 15px; color: #007BFF; text-transform: uppercase; }
+        h2 { font-size: 22px; margin-bottom: 10px; color: #FF4500; }
+        p { font-size: 18px; margin-bottom: 15px; color: #444; }
+        .highlight { color: #FF5733; font-weight: bold; }
+        .pay-btn {
+            background: linear-gradient(135deg, #007BFF, #00CFFD);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.3s;
+            display: inline-block;
+            margin-top: 15px;
+            box-shadow: 2px 2px 15px rgba(0, 200, 255, 0.5);
+        }
+        .pay-btn:hover { background: linear-gradient(135deg, #0056b3, #008fb3); transform: scale(1.07); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>cyber security</h1>
+        <p>Cybersecurity is the practice of protecting computer systems, networks, and data from malicious attacks, including hacking, malware, phishing, and ransomware, aiming to safeguard sensitive information and maintain operational integrity across digital environments, particularly those connected to the internet; it encompasses various aspects like network security, application security, endpoint security, cloud security, and user awareness training to identify and mitigate potential threats. 
+            Key aspects o <p>
+        <h2>Instructor: <span class="highlight">soloman</span></h2>
+        <p>PH.D in cyber security | 5+ years of experience</p>
+
+        <h2>Course Details</h2>
+        <p><strong>Price:</strong> <span class="highlight">₹11499</span></p>
+
+        <button class="pay-btn" id="pay-btn">Pay Now</button>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document.getElementById("pay-btn").onclick = function () {
+            let amount =11499;  // 11499
+
+            fetch("/create_order/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: `amount=${amount}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                let options = {
+                    "key": data.razorpay_key,
+                    "amount": data.amount,
+                    "currency": "INR",
+                    "name": "Generative AI Course",
+                    "description": "Course Enrollment Payment",
+                    "order_id": data.order_id,
+                    "handler": function (response) {
+                        fetch("/verify_payment/", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: JSON.stringify({
+                                order_id: data.order_id,
+                                payment_id: response.razorpay_payment_id,
+                                signature: response.razorpay_signature
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(verification => {
+                            if (verification.status === "Payment verified successfully") {
+                                alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
+                            } else {
+                                alert("Payment verification failed!");
+                            }
+                        });
+                    },
+                    "theme": {
+                        "color": "#3399cc"
+                    }
+                };
+
+                let rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(error => console.error("Error:", error));
+        };
+    </script>
+</body>
+</html>
